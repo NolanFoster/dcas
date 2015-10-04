@@ -1,0 +1,51 @@
+\documentclass [10pt]{article}
+\oddsidemargin=0.0cm
+\textwidth=16.5cm
+\textheight=22.8cm
+\topmargin=-1.0cm
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{fancyhdr}
+\usepackage{multicol}
+\usepackage{mathtools}% Loads amsmath
+\usepackage{flowchart}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Foster, Nolan}
+\rhead{Drone Delivery}
+\renewcommand{\headrulewidth}{1pt}
+\lfoot{Page \thepage}
+% Start the document
+\begin{document}
+  {\bf State Diagram  }
+  \vskip 8pt
+  \begin{center}
+  \begin{tikzpicture}[node distance=2cm, scale=0.5, transform shape]
+    \node (start) [startstop] {Start};
+    \node (1) [process, right of=start, xshift=4cm] {boot};
+    \node (2) [process, right of=1, xshift=4cm] {Stand by for Task};
+    \node (3) [process, below of=2, yshift=-1cm] {lift off};
+    \node (4) [process, left of=3, xshift=-4cm] {Pick Up};
+    \node (5) [process, left of=4, xshift=-4cm] {Navigate};
+    \node (7) [process, below of=5, yshift=-1cm] {Deliver};
+    \node (8) [process, right of=7, xshift=4cm] {Return};
+    \node (9) [process, right of=8, xshift=4cm] {Land};
+    \node (10) [decision, below of=9, yshift=-3cm] {Number of Task=0?};  
+    \node (stop) [startstop, left of=10, xshift=-4cm] {Done};
+    %Draw Lines
+    \draw [arrow] (start) -- (1);
+    \draw [arrow] (1) -- (2);
+    \draw [arrow] (2) -- (3);
+    \draw [arrow] (3) -- (4);
+    \draw [arrow] (4) -- (5);
+    \draw [arrow] (5) -- (7);
+    \draw [arrow] (7) -- (8);
+    \draw [arrow] (8) -- (9);
+    \draw [arrow] (9) -- (10);
+    \draw [arrow] (10) -- node[anchor=north]{Yes}(stop);
+     \draw [arrow] (10.east)node[anchor=west]{No}|-(2.east);
+   
+  \end{tikzpicture}
+  \end{center}
+
+\end{document}
