@@ -28,5 +28,8 @@
 *.x86_64
 *.hex
 
+#LaTex Files
+*.aux
+*.log
 # Debug files
 *.dSYM/
