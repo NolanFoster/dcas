@@ -36,4 +36,4 @@ int Drone_deliver(void *self);
 void Drone_return_home(void *self);
 void Drone_land(void *self);
 void Drone_destroy(void *self);
-void *Drone_new(size_t size, Drone proto, int id);
+void *Drone_new(size_t size, Drone proto, int *id);

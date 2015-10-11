@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <drone.h>
 #include <assert.h>
+#include <time.h>
 
 int Drone_init(void *self)
 {
@@ -14,42 +15,28 @@ int Drone_init(void *self)
 
 void Drone_boot(void *self){
 	Drone *obj = self;
-	obj->state = 1;
-	obj->busy =1;
-	int id = obj->id;
-	printf("\x1b[34m Drone[%d] : Boot Sequece started.\n\x1b[0m",id);
-	sleep(1);
-	printf("\x1b[34m Drone[%d] : GPS Online\n\x1b[0m",id);
-	sleep(1);
-	printf("\x1b[34m Drone[%d] : Motor 1 Ready\n\x1b[0m",id);
-	sleep(1);
-	printf("\x1b[34m Drone[%d] : Motor 2 Ready\n\x1b[0m",id);
-	sleep(1);
-	printf("\x1b[34m Drone[%d] : Motor 3 Ready\n\x1b[0m",id);
-	sleep(1);
-	printf("\x1b[34m Drone[%d] : Motor 4 Ready\n\x1b[0m",id);
-	printf("\x1b[34m Drone[%d] : Boot Completed\n\x1b[0m",id);
-	obj->busy =0;
-	printf("\x1b[32m Drone[%d] Standing By  \n\x1b[0m", id);
+	int* id = obj->id;
+	printf("\x1b[34m Drone[%d] : Boot Sequece started.\n\x1b[0m",*id);
+	printf("\x1b[34m Drone[%d] : GPS Online\n\x1b[0m",*id);
+	printf("\x1b[34m Drone[%d] : Motor 1 Ready\n\x1b[0m",*id);
+	printf("\x1b[34m Drone[%d] : Motor 2 Ready\n\x1b[0m",*id);
+	printf("\x1b[34m Drone[%d] : Motor 3 Ready\n\x1b[0m",*id);
+	printf("\x1b[34m Drone[%d] : Motor 4 Ready\n\x1b[0m",*id);
+	printf("\x1b[34m Drone[%d] : Boot Completed\n\x1b[0m",*id);
+	sleep(rand()%2);
+	printf("\x1b[32m Drone[%d] Standing By  \n\x1b[0m", *id);
 	//pthread_exit(0);
 }
 
 
 void Drone_stand_by(void *self){
 	Drone *obj = self;
-	obj->state = 2;
-	obj->busy =1;
-	while(	obj->state==2){
 	printf("\x1b[32mDrone Standing By  \x1b[0m");
-}
-obj->busy =0;
 pthread_exit(0);
 }
 
 void Drone_navigate(void *self, int x, int y){
 	Drone *obj = self;
-	obj->state = 5;
-	obj->busy =1;
 	int id = (obj->id);
 	sleep(1);
 	printf("%d", id );
@@ -72,59 +59,43 @@ void Drone_navigate(void *self, int x, int y){
 		printf("%d", curr_x);printf("\x1b[33m, \x1b[0m");	printf("%d", i);printf("\x1b[33m) \n\x1b[0m");
 	}
 	curr_y = (y-curr_y);
-	obj->busy =0;
-//	pthread_exit(0);
+	pthread_exit(0);
 }
 
 int Drone_pick_up(void *self){
 	Drone *obj = self;
-	obj->state = 4;
-	obj->busy =1;
 	sleep(1);
 	printf("\x1b[32mDrone ready for pick up  \n\x1b[0m");
 	sleep(1);
 	printf("\x1b[34mDrone requesting payload \n\x1b[0m");
 	sleep(1);
 	printf("\x1b[32mDrone payload picked up \n\x1b[0m");
-	obj->busy =0;
-//	pthread_exit(0);
+	pthread_exit(0);
 	return 0;
 }
 
 void Drone_lift_off(void *self){
 	Drone *obj = self;
-	obj->state = 3;
-	obj->busy =1;
 	printf("\x1b[32mDrone Standing By  \x1b[0m");
-	obj->busy =0;
 	pthread_exit(0);
 }
 
 int Drone_deliver(void *self){
 	Drone *obj = self;
-	obj->state = 6;
-	obj->busy =1;
 	printf("\x1b[32mDrone Standing By  \x1b[0m");
-	obj->busy =0;
 	pthread_exit(0);
 	return 0;
 }
 
 void Drone_return_home(void *self){
 	Drone *obj = self;
-	obj->state = 7;
-	obj->busy =1;
 	printf("\x1b[32mDrone Standing By  \x1b[0m");
-	obj->busy =0;
 	pthread_exit(0);
 }
 
 void Drone_land(void *self){
 	Drone *obj = self;
-	obj->state = 8;
-	obj->busy =1;
 	printf("\x1b[32mDrone Standing By  \x1b[0m");
-	obj->busy =0;
 	pthread_exit(0);
 }
 
@@ -137,7 +108,7 @@ void Drone_destroy(void *self)
 				free(obj);
 		}
 }
-void *Drone_new(size_t size, Drone proto, int id)
+void *Drone_new(size_t size, Drone proto, int *id)
 {
 		// setup the default functions in case they aren't set
 		if(!proto.init) proto.init = Drone_init;
@@ -157,7 +128,7 @@ void *Drone_new(size_t size, Drone proto, int id)
 
 		// copy the id over
 
-		el->id = id;
+		el->id = *id;
 		el->state = 0;
 		el->busy = 0;
 		el->curr_x=0;

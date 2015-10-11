@@ -32,5 +32,5 @@ struct Task {
 typedef struct Task Task;
 #endif
 
-	pthread_mutex_t fieldMutex;
+	pthread_mutex_t mapMutex;
 	pthread_mutex_t deliveryMutex;
