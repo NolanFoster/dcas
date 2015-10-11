@@ -16,28 +16,24 @@ void Drone_boot(void *self){
 	Drone *obj = self;
 	obj->state = 1;
 	obj->busy =1;
-	int id = *(obj->id);
-	printf("%d", id );
-	printf("\x1b[34m : Boot Sequece started.\n\x1b[0m");
+	int id = obj->id;
+	printf("\x1b[34m Drone[%d] : Boot Sequece started.\n\x1b[0m",id);
 	sleep(1);
-	printf("%d", id );
-	printf("\x1b[34m : GPS Online\n\x1b[0m");
-	sleep(1); printf("%d", id );
-	printf("\x1b[34m : Motor 1 Ready\n\x1b[0m");
-	sleep(1); printf("%d", id );
-	printf("\x1b[34m : Motor 2 Ready\n\x1b[0m");
-	sleep(1); printf("%d", id );
-	printf("\x1b[34m : Motor 3 Ready\n\x1b[0m");
-	sleep(1); printf("%d", id );
-	printf("\x1b[34m : Motor 4 Ready\n\x1b[0m");
-	printf("\x1b[34mBoot Completed for Drone  \x1b[0m");
-	printf("%d\n", *(obj->id));
+	printf("\x1b[34m Drone[%d] : GPS Online\n\x1b[0m",id);
+	sleep(1);
+	printf("\x1b[34m Drone[%d] : Motor 1 Ready\n\x1b[0m",id);
+	sleep(1);
+	printf("\x1b[34m Drone[%d] : Motor 2 Ready\n\x1b[0m",id);
+	sleep(1);
+	printf("\x1b[34m Drone[%d] : Motor 3 Ready\n\x1b[0m",id);
+	sleep(1);
+	printf("\x1b[34m Drone[%d] : Motor 4 Ready\n\x1b[0m",id);
+	printf("\x1b[34m Drone[%d] : Boot Completed\n\x1b[0m",id);
 	obj->busy =0;
-	printf("\x1b[32mDrone \x1b[0m");
-	printf("%d", *(obj->id)); sleep(1);
-	printf("\x1b[32m Standing By  \n\x1b[0m");
-	pthread_exit(0);
+	printf("\x1b[32m Drone[%d] Standing By  \n\x1b[0m", id);
+	//pthread_exit(0);
 }
+
 
 void Drone_stand_by(void *self){
 	Drone *obj = self;
@@ -54,7 +50,7 @@ void Drone_navigate(void *self, int x, int y){
 	Drone *obj = self;
 	obj->state = 5;
 	obj->busy =1;
-	int id = *(obj->id);
+	int id = (obj->id);
 	sleep(1);
 	printf("%d", id );
 	printf("\x1b[34m : Navigating to  (\x1b[0m");
@@ -141,7 +137,7 @@ void Drone_destroy(void *self)
 				free(obj);
 		}
 }
-void *Drone_new(size_t size, Drone proto, int *id)
+void *Drone_new(size_t size, Drone proto, int id)
 {
 		// setup the default functions in case they aren't set
 		if(!proto.init) proto.init = Drone_init;
@@ -160,7 +156,8 @@ void *Drone_new(size_t size, Drone proto, int *id)
 		*el = proto;
 
 		// copy the id over
-		el->id = *id;
+
+		el->id = id;
 		el->state = 0;
 		el->busy = 0;
 		el->curr_x=0;
