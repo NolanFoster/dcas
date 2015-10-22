@@ -1,18 +1,25 @@
+#include <ncurses.h>
+#include <unistd.h>
 #ifndef _drone_h
 #define _drone_h
 //Drone Commands
+typedef struct Loc{
+  void *self;
+  int x;
+  int y;
+}Loc;
+
 typedef long unsigned int size_t;
 
 typedef struct {
     int id;
-    int *state;
-    int *busy;
+    int state;
     int *curr_x;
     int *curr_y;
     int (*init)(void *self);
     void (*boot)(void *self);
     void (*stand_by)(void *self);
-    void (*navigate)(void *self, int x, int y);
+    void (*navigate)(Loc *l);
     int (*pick_up)(void *self);
     void (*lift_off)(void *self);
     int (*deliver)(void *self);
@@ -27,9 +34,10 @@ typedef struct {
 #endif
 
 int Drone_init(void *self);
+int Drone_state(void *self);
 void Drone_boot(void *self);
 void Drone_stand_by(void *self);
-void Drone_navigate(void *self, int x, int y);
+void Drone_navigate(Loc *l);
 int Drone_pick_up(void *self);
 void Drone_lift_off(void *self);
 int Drone_deliver(void *self);
