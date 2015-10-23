@@ -1,157 +1,95 @@
-	/*
-	* Filename: dcas.c
-	* Description: Driver for Drone Colision Avoidnce System
-	* Author: Nolan Foster
-	* Date Created: 10/7/15
-	*/
-	#include <ncurses.h>
-	#include <unistd.h>
-	#include <dcas.h>
-	#include <stdio.h>
-	#include <map.h>
-	#define NUM_DRONES	10
-	#define TASK 1
-	#define DELAY 60000
+#include <dcas.h>
+#include <stdio.h>
+#include <map.h>
+#define NUM_DRONES	100
 
-	void draw_borders(WINDOW *screen) {
-		int x, y, i;
-		getmaxyx(screen, y, x);
-		// 4 corners
-		mvwprintw(screen, 0, 0, "+");
-		mvwprintw(screen, y - 1, 0, "+");
-		mvwprintw(screen, 0, x - 1, "+");
-		mvwprintw(screen, y - 1, x - 1, "+");
-		// sides
-		for (i = 1; i < (y - 1); i++) {
-			mvwprintw(screen, i, 0, "|");
-			mvwprintw(screen, i, x - 1, "|");
-		}
-		// top and bottom
-		for (i = 1; i < (x - 1); i++) {
-			mvwprintw(screen, 0, i, "-");
-			mvwprintw(screen, y - 1, i, "-");
-		}
+
+int main(int argc, char *argv[]) {
+
+	pthread_mutex_init(&mapMutex, NULL);
+	pthread_mutex_init(&deliveryMutex, NULL);
+	pthread_t threads[NUM_DRONES];
+
+	make_map();
+	//Set Control Center at 1
+	//setPosition(0, 0, 1);
+	int DeliveryDrone_init(void *self)
+	{
+		DeliveryDrone *DeliveryDrone = self;
+		return 1;
 	}
 
-	int main(int argc, char *argv[]) {
+	Drone DeliveryDroneProto = {
+		.init = DeliveryDrone_init
+	};
 
-		pthread_mutex_init(&mapMutex, NULL);
-		pthread_mutex_init(&deliveryMutex, NULL);
-		pthread_t threads[NUM_DRONES];
+	DeliveryDrone* drones[NUM_DRONES];
+int ch;int i,j=0;int num_of_drones;
+printf("\x1b[34m Press 0 for level 0\n\x1b[0m");
+printf("\x1b[34m Press 1 for level 1A\n\x1b[0m");
+printf("\x1b[34m Press 2 for level 1B\n\x1b[0m");
+printf("\x1b[34m Press 3 for level 2\n\x1b[0m");
+printf("\x1b[31m Press ctrl+c to Exit\n\x1b[0m");
 
-	/*
-	* Create new Proto Object For Delivery Drone
-	*/
-		int DeliveryDrone_init(void *self)
-		{
-			DeliveryDrone *DeliveryDrone = self;
-			DeliveryDrone->x = 0;
-			DeliveryDrone->y = 0;
-			DeliveryDrone->xf=0;
-			return 1;
+
+while(1){
+scanf("%d", &ch);
+switch(ch){
+	case 0:
+		printf("\x1b[34m Level 0\n\x1b[0m");
+		num_of_drones=1;
+		for(i=1;i<=num_of_drones;i++){
+			drones[i] = new_drone(DeliveryDrone, &i);
+			pthread_create(&threads[i], NULL, drones[i]->_(boot), &drones[i]);
 		}
+	break;
 
-		Drone DeliveryDroneProto = {
-			.init = DeliveryDrone_init
-		};
-
-		DeliveryDrone* drones[NUM_DRONES];
-		make_map();
-
-		printf("\x1b[32mMap \x1b[0m");
-	/*
-	* Boot all required drones
-	*/
-	int i;int j=0;
-	for(i=1;i<=NUM_DRONES;i++){
-		drones[i] = new_drone(DeliveryDrone, &i);
-		pthread_create(&threads[i], NULL, drones[i]->_(boot), &drones[i]);
-		}
-	//
-//	Loc* l;
-//	l->self=drones[1];
-//	l->x=10;
-//	l->y=10;
-	//pthread_create(&threads[1], NULL, drones[1]->_(navigate), (void *)l);
-
-			int parent_x, parent_y;
-			int x = 0, y = 0;
-			int score_size = NUM_DRONES+3;
-			int max_y = 0, max_x = 0;
-			int next_x = 0;
-			int direction = 1;
-			initscr();
-			noecho();
-			curs_set(FALSE);
-
-			getmaxyx(stdscr, max_y, max_x);
-			// get our maximum window dimensions
-			getmaxyx(stdscr, parent_y, parent_x);
-			// set up initial windows
-			WINDOW *field = newwin(parent_y - score_size, parent_x, 0, 0);
-			WINDOW *score = newwin(score_size, parent_x, parent_y - score_size, 0);
-	// draw to our windows
-	mvwprintw(field, 0, 0, "CC");
-	mvwprintw(score, 0, 0, "Console");
-	// draw our borders
-	draw_borders(field);
-	draw_borders(score);
-	// simulate the drone loop
-	while(1) {
-		// draw to our windows
-		mvwprintw(field, 1, 1, "CC");
-		mvwprintw(score, 1, 1, "Console");
-		for(i=0; i<NUM_DRONES;i++){
-			mvwprintw(score, 1+i, 1,  "Drone %d: ", i);
-			mvwprintw(score, 1+i, 9,  "Booted");
+	case 1:
+		printf("\x1b[34m Level 1A\n\x1b[0m");
+		num_of_drones=5; int rc;
+		for(i=1;i<=num_of_drones;i++){
+			drones[i] = new_drone(DeliveryDrone, &i);
+			pthread_create(&threads[i], NULL, drones[i]->_(boot), &drones[i]);
 		}
 
 
-		// draw our borders
-		draw_borders(field);
-		draw_borders(score);
-		for(i=0; i<100;i++){
-			for(j=0;j<30;j++){
-				int space =  get_position(i,j);
-
-				switch (space){
-					case 0:
-					break;
-					case 1:
-						mvwprintw(field, j+1, i+1, "#");
-					break;
-					case 2:
-						mvwprintw(field, j+1, i+1, "X"); // Print drone at the current xy position
-					break;
-					default:
-					break;
-				}
-	}
-	}
-	  refresh();
-	  usleep(DELAY);       // Shorter delay between movements
-		next_x = x + direction;
-	if (next_x >= max_x || next_x < 0) {
-	direction*= -1;
-	} else {
-	x+= direction;
-	}
-		// refresh each window
-		wrefresh(field);
-		wrefresh(score);
-
-		//clear display
-		wclear(field);
-		wclear(score);
-	}
-	// clean up
-		delwin(field);
-		delwin(score);
+//	Assignment assign2;
+//	assign2.self=&drones[2];
+//	assign2.x=10;
+//	assign2.y=6;
+	//pthread_create(&threads[2], NULL, drones[2]->_(navigate), &assign2);
+/*	int check=10;
+	while(check!=10){
+		printf("ERROR: return code %d\n", drones[1]->_(state)(&drones[1],1,0));
+	for(i=1;i<num_of_drones;i++){
+		if(drones[i]->_(state)(&drones[i],1,0)==1){
+			printf("\x1b[34m Level 1A\n\x1b[0m");
+			Assignment assign1;
+			assign1.self=&drones[i];
+			assign1.x=5;
+			assign1.y=3;
+			pthread_create(&threads[i], NULL, drones[i]->_(navigate), &assign1);
+			check++;
+		}
+		}
+	}*/
+	break;
+	case 2:
+	printf("\x1b[34m Level 1B\n\x1b[0m");
+	break;
+	case 3:
+	printf("\x1b[34m Level 2\n\x1b[0m");
+	break;
+	default:
+	printf("\x1b[34m Press ctrl+c to Exit\n\x1b[0m");
+	pthread_exit(NULL);
+	break;
+}
+}
 
 
-		pthread_exit(NULL);
+	pthread_exit(NULL);
 
 
-
-		return(0);
-	}
+	return(0);
+}

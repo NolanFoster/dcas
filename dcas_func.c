@@ -7,7 +7,7 @@
 
 
 
-void pan_path(assignment *manual)
+void plan_path(Assignment *manual)
 {
 
 }

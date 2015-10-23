@@ -1,122 +1,113 @@
-/*
-* Filename: drone_func.c
-* Description: Functions for Parent Drone Object
-* Author: Nolan Foster
-* Date Created: 10/7/15
-*/
 #include <stdio.h>
 #include <stddef.h>
 #include <string.h>
 #include <stdlib.h>
 #include <drone.h>
 #include <assert.h>
-#include <time.h>
 #include <map.h>
+#include <time.h>
 
-
-/*
-* Drone instanciation
-*/
 int Drone_init(void *self)
 {
-		// do nothing really depends on proto object
+		// do nothing really
 		return 1;
 }
 
-int Drone_state(void *self){
+int Drone_state(void *self, int get, int set){
+	pthread_mutex_unlock(&stateMutex);
+	pthread_mutex_lock(&stateMutex);
 	Drone *obj = self;
-	return obj->state;
+	if(!get)
+	obj->curr_state=set;
+	return obj->curr_state;
+	pthread_mutex_unlock(&stateMutex);
 }
 
-/*
-* Drone Boot Sequence
-*/
 void Drone_boot(void *self){
 	Drone *obj = self;
 	int* id = obj->id;
-	obj->state=0;
-	obj->curr_x=id+1;
+	obj->curr_x=*id-1;
 	obj->curr_y=0;
-	//setPosition(*id,0, 2);
-	sleep(rand()%2);
-	obj->state=1;
+	sleep(*id);
+	setPosition(0, *id-1, *id);
+	print_map();
+	printf("\x1b[32m Drone %d  Booted \n\x1b[0m", *id);
+	Drone_stand_by(self);
+
 }
 
 
-/*
-* Drone stand by
-* Input: Self
-* Description: Drone hovers and waits for command from command center
-*/
 void Drone_stand_by(void *self){
+	Drone_state(self, 0,1);
 	Drone *obj = self;
-	obj->state=1;
-	printf("\x1b[32mDrone Standing By  \x1b[0m");
-pthread_exit(0);
+	int* id = obj->id;
+	Assignment assign;
+	assign.self=self;
+	assign.x=rand()%50;
+	assign.y=rand()%25;
+	sleep(rand()%2);
+
+	Drone_navigate(&assign);
+	printf("\x1b[32mDrone %d Standing By  \n\x1b[0m", *id);
+
 }
 
-/*
-* Drone Navigate
-* Input: Destination Coordinates
-* Description: Navigates Drone to Destination
-*/
-void Drone_navigate(Loc *l){
-	printf("\x1b[32mNavigate \x1b[0m");
-	Drone *obj = l->self;
-	int id = (obj->id);
-	sleep(1);
+void Drone_navigate(Assignment *assign){
+	Drone_state(assign->self, 0,2);
+	int x= assign->x;
+	int y= assign->y;
+	Drone *obj = assign->self;
+	int* id = obj->id;
 	int curr_x = (*obj).curr_x;
 	int curr_y = (*obj).curr_y;
-
-	printf("\x1b[32mset positions  \x1b[0m");
-	setPosition(curr_x, curr_y, 1);
 	int i;
-	for(i=0;i<=(l->x-curr_x);++i){
-		setPosition(i-1, curr_y, 0);
-		setPosition(i, curr_y, 1);
+	setPosition(curr_y, curr_x, 0);
+	for(i=0;i<=(x-curr_x);++i){
+		setPosition(curr_y, i, *id);
+		print_map();
+		printf("\x1b[32mDrone moved to %d , %d  \n\x1b[0m", i, curr_y);
+		sleep(1);
+		setPosition(curr_y, i, 0);
+		print_map();
 	}
-	curr_x = (l->x-curr_x);
-	for(i=0;i<=(l->y-curr_y);++i){
-		setPosition(curr_x, i-1, 0);
-		setPosition(curr_x, i, 1);
+	curr_x = (x-curr_x);
+	for(i=0;i<=(y-curr_y);++i){
+		setPosition(i, curr_x, *id);
+		print_map();
+		printf("\x1b[32mDrone moved to %d , %d  \n\x1b[0m", curr_x, i);
+		sleep(1);
+		setPosition(i, curr_x, 0);
+		print_map();
 	}
-	curr_y = (l->y-curr_y);
-	pthread_exit(0);
+	curr_y = (y-curr_y);
+	obj->curr_x=curr_x;
+	obj->curr_y=curr_y;
+	setPosition((*obj).curr_y, (*obj).curr_x, *id);
+	Drone_pick_up(assign->self);
 }
 
-/*
-* Drone stand by
-* Input: Self
-* Description: Drone picks up package
-*/
-int Drone_pick_up(void *self){
+void Drone_pick_up(void *self){
 	Drone *obj = self;
-	sleep(1);
+	int* id = obj->id;
+	setPosition((*obj).curr_y, (*obj).curr_x, *id);
+	print_map();
 	printf("\x1b[32mDrone ready for pick up  \n\x1b[0m");
 	sleep(1);
-	printf("\x1b[34mDrone requesting payload \n\x1b[0m");
+	print_map();
+	printf("\x1b[33mDrone requesting payload \n\x1b[0m");
 	sleep(1);
+	print_map();
 	printf("\x1b[32mDrone payload picked up \n\x1b[0m");
-	pthread_exit(0);
-	return 0;
+
+	Drone_return_home(self);
 }
 
-/*
-* Drone stand by
-* Input: Self
-* Description: Drone lifts off fron ground
-*/
 void Drone_lift_off(void *self){
 	Drone *obj = self;
 	printf("\x1b[32mDrone Standing By  \x1b[0m");
 	pthread_exit(0);
 }
 
-/*
-* Drone deliver
-* Input: Self
-* Description: Drone drop off package
-*/
 int Drone_deliver(void *self){
 	Drone *obj = self;
 	printf("\x1b[32mDrone Standing By  \x1b[0m");
@@ -124,34 +115,48 @@ int Drone_deliver(void *self){
 	return 0;
 }
 
-/*
-* Drone Return Home
-* Input: Self
-* Description: Drone Returns to Control Center
-*/
 void Drone_return_home(void *self){
+	int x= 0;
+	int y= 0;
 	Drone *obj = self;
-	printf("\x1b[32mDrone Standing By  \x1b[0m");
-	pthread_exit(0);
+	int* id = obj->id;
+	printf("\x1b[32mDrone %d Returning Home  \n\x1b[0m", *id);
+
+	int curr_x = (*obj).curr_x;
+	int curr_y = (*obj).curr_y;
+	int i;
+	setPosition(curr_y, curr_x, 0);
+	print_map();
+	printf("\x1b[32mDrone %d is at %d , %d  \n\x1b[0m", *id, curr_x, curr_y);
+	sleep(1);
+	while(curr_y>0){
+		setPosition(curr_y, curr_x, *id);
+		print_map();
+		printf("\x1b[32mDrone %d moved to %d , %d  \n\x1b[0m", *id, curr_x, curr_y);
+		sleep(1);
+		setPosition(curr_y, curr_x, 0);
+		print_map();
+		curr_y--;
+	}
+	while(curr_x>0){
+		setPosition(curr_y, curr_x, *id);
+		print_map();
+		printf("\x1b[32mDrone %d moved to %d , %d  \n\x1b[0m", *id, curr_x, curr_y);
+		sleep(1);
+		setPosition(curr_y, curr_x, 0);
+		print_map();
+		curr_x--;
+	}
+	curr_y = (y-curr_y);
+	printf("\x1b[32mDrone %d is Home  \n\x1b[0m", *id);
 }
 
-/*
-* Drone Land
-* Input: Self
-* Description: Drone lands
-*/
 void Drone_land(void *self){
 	Drone *obj = self;
 	printf("\x1b[32mDrone Standing By  \x1b[0m");
 	pthread_exit(0);
 }
 
-
-/*
-* Drone destroy
-* Input: Self
-* Description: Restores memory allocated by drone object
-*/
 void Drone_destroy(void *self)
 {
 		Drone *obj = self;
@@ -161,12 +166,6 @@ void Drone_destroy(void *self)
 				free(obj);
 		}
 }
-
-/*
-* Drone destroy
-* Input: size_t, Drone, int
-* Description: Creates new Drone object refernce and allocates memory
-*/
 void *Drone_new(size_t size, Drone proto, int *id)
 {
 		// setup the default functions in case they aren't set
@@ -179,6 +178,7 @@ void *Drone_new(size_t size, Drone proto, int *id)
 		if(!proto.deliver) proto.deliver= Drone_deliver;
 		if(!proto.return_home) proto.return_home = Drone_return_home;
 		if(!proto.land) proto.land = Drone_land;
+		if(!proto.state) proto.state = Drone_state;
 
 		// this seems weird, but we can make a struct of one size,
 		// then point a different pointer at it to "cast" it
@@ -188,7 +188,8 @@ void *Drone_new(size_t size, Drone proto, int *id)
 		// copy the id over
 
 		el->id = *id;
-		el->state = 0;
+		el->curr_state = 0;
+		el->busy = 0;
 		el->curr_x=0;
 		el->curr_y=0;
 

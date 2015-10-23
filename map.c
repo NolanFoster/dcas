@@ -22,17 +22,35 @@ void make_map();
 * Description: Creates static map(2D Array)
 */
 void make_map(){
-	int i=0;
-	int j=0;
-	for(i=0;i<20;i++){
+	int i,j=0;
+	for(i=0;i<50;i++){
 		for(j =0;j<50;j++){
 			*map[i][j]==1;
 		}
 	}
-	map[20][50] = 1024;
+	map[50][50] = 1024;
 
 }
 
+/*
+* Print Map
+* Description: Prints map if not being used
+*/
+void print_map(){
+	//pthread_mutex_lock(&mapMutex);
+	int i,j=0;
+	printf("\033[2J\033[1;1H");
+	for(i=0;i<25;i++){
+		for(j=0;j<50;j++){
+			if(map[i][j]!=0)
+				printf("\x1b[31m%d\x1b[0m",map[i][j]);
+			else
+			 printf("%d",map[i][j]);
+		}
+		printf("\n");
+	}
+	//pthread_mutex_unlock(&mapMutex);
+}
 /*
 * Get Position
 * Input: int x, int y
@@ -40,7 +58,9 @@ void make_map(){
 * Description: Checks if position is clear
 */
 int get_position(int x, int y){
+	//pthread_mutex_lock(&mapMutex);
 		return map[x][y];
+	//pthread_mutex_unlock(&mapMutex);
 }
 
 /*
@@ -49,10 +69,9 @@ int get_position(int x, int y){
 * Description: Sets new positon on the map
 */
 void setPosition(int x, int y, int val){
-	pthread_mutex_unlock(&mapMutex);
-	pthread_mutex_lock(&mapMutex);
+	//pthread_mutex_lock(&mapMutex);
 	map[x][y] = val;
-	pthread_mutex_unlock(&mapMutex);
+	//pthread_mutex_unlock(&mapMutex);
 }
 
 /*

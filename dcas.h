@@ -1,18 +1,13 @@
 #ifndef _dcas_h
 #define _dcas_h
 
-#include <pthread.h>
 #include <drone.h>
+#include <pthread.h>
 
 typedef struct coordinate{
   double latitude, longtitude;
 }coordinate;
 
-typedef struct assignment{
-  char payload;
-  coordinate *pick_up;
-  coordinate *drop_off;
-}assignment;
 
 
 struct DeliveryDrone {
@@ -31,6 +26,5 @@ struct Task {
 
 typedef struct Task Task;
 #endif
-
-	pthread_mutex_t mapMutex;
-	pthread_mutex_t deliveryMutex;
+pthread_mutex_t mapMutex;
+pthread_mutex_t deliveryMutex;
