@@ -5,7 +5,7 @@ typedef long unsigned int size_t;
 
 typedef struct Assignment{
 void *self;
- int x, y;
+ int id, x, y;
 }Assignment;
 
 typedef struct {
@@ -17,12 +17,12 @@ typedef struct {
     int (*state)(void *self, int get, int set);
     int (*init)(void *self);
     void (*boot)(void *self);
-    void (*stand_by)(void *self);
+    void (*stand_by)(void *self, int id);
     void (*navigate)(Assignment *assign);
-    void (*pick_up)(void *self);
+    void (*pick_up)(void *self, int id);
     void (*lift_off)(void *self);
     int (*deliver)(void *self);
-    void (*return_home)(void *self);
+    void (*return_home)(void *self, int id);
     void (*land)(void *self);
     void (*destroy)(void *self);
 } Drone;
@@ -34,12 +34,12 @@ typedef struct {
 
 int Drone_init(void *self);
 void Drone_boot(void *self);
-void Drone_stand_by(void *self);
+void Drone_stand_by(void *self, int id);
 void Drone_navigate(Assignment *assign);
-void Drone_pick_up(void *self);
+void Drone_pick_up(void *self, int id);
 void Drone_lift_off(void *self);
 int Drone_deliver(void *self);
-void Drone_return_home(void *self);
+void Drone_return_home(void *self, int id);
 void Drone_land(void *self);
 void Drone_destroy(void *self);
 int Drone_state(void *self, int get, int set);

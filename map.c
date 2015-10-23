@@ -37,7 +37,7 @@ void make_map(){
 * Description: Prints map if not being used
 */
 void print_map(){
-	//pthread_mutex_lock(&mapMutex);
+	pthread_mutex_lock(&mapMutex);
 	int i,j=0;
 	printf("\033[2J\033[1;1H");
 	for(i=0;i<25;i++){
@@ -49,7 +49,7 @@ void print_map(){
 		}
 		printf("\n");
 	}
-	//pthread_mutex_unlock(&mapMutex);
+	pthread_mutex_unlock(&mapMutex);
 }
 /*
 * Get Position
@@ -58,9 +58,7 @@ void print_map(){
 * Description: Checks if position is clear
 */
 int get_position(int x, int y){
-	//pthread_mutex_lock(&mapMutex);
 		return map[x][y];
-	//pthread_mutex_unlock(&mapMutex);
 }
 
 /*
@@ -69,9 +67,10 @@ int get_position(int x, int y){
 * Description: Sets new positon on the map
 */
 void setPosition(int x, int y, int val){
-	//pthread_mutex_lock(&mapMutex);
-	map[x][y] = val;
-	//pthread_mutex_unlock(&mapMutex);
+	pthread_mutex_lock(&mapMutex);
+	//if((x==0&&y==0)||map[x][y]==0||val==0)
+		map[x][y] = val;
+	pthread_mutex_unlock(&mapMutex);
 }
 
 /*
